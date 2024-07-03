@@ -57,8 +57,7 @@ module.exports = {
             components.push(actionRow);
         });
 
-        await message.reply({ content: 'Otwieram kartotekę...', ephemeral: true });
-        await message.author.send({ content: 'Proszę wybrać akcję:', components: components });
+        await message.reply({ content: 'Proszę wybrać akcję:', components: components, ephemeral: true });
     },
 
     async handleInteraction(interaction, client) {
