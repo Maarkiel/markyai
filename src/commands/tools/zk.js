@@ -28,6 +28,7 @@ module.exports = {
             '1257739543738581043',
             '1257744580682711152'
         ];
+
         if (!userId) {
             return message.reply('Musisz podać ID użytkownika.');
         }
@@ -63,7 +64,7 @@ module.exports = {
         const userRecords = db[userId];
         const embed = new EmbedBuilder()
             .setTitle(`Kartoteka użytkownika ${user.tag} (${userId})`)
-            .setDescription('Użytkownik już jest wpisany w kartotece, podaje Ci wpisy:')
+            .setDescription('Użytkownik już jest wpisany w kartotece, oto wpisy:')
             .setColor('#00FF00');
 
         userRecords.forEach((record, index) => {
@@ -76,11 +77,11 @@ module.exports = {
             .addComponents(
                 new ButtonBuilder()
                     .setCustomId(`updateRecord-${userId}`)
-                    .setLabel('Aktualizuj Wpis')
+                    .setLabel('Edytuj')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
-                    .setCustomId(`noUpdateRecord-${userId}`)
-                    .setLabel('Nie')
+                    .setCustomId(`deleteRecord-${userId}`)
+                    .setLabel('Usuń')
                     .setStyle(ButtonStyle.Danger)
             );
 
@@ -99,12 +100,12 @@ module.exports = {
                 .setCustomId('category')
                 .setLabel('Wybierz kategorię')
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder('Ban,Unban,Obserwacja,Pochwała')
+                .setPlaceholder('Ban, Unban, Obserwacja, Pochwała')
                 .setRequired(true);
 
             const descriptionInput = new TextInputBuilder()
                 .setCustomId('description')
-                .setLabel('Opisz sytuację (co sie dzieje, jaka decyzja):')
+                .setLabel('Opisz sytuację (co się dzieje, jaka decyzja):')
                 .setStyle(TextInputStyle.Paragraph)
                 .setRequired(true);
 
@@ -115,7 +116,38 @@ module.exports = {
 
             await interaction.showModal(modal);
         } else if (action === 'noCreateRecord' || action === 'noUpdateRecord') {
-            await interaction.reply({ content: 'Spoko, W razie niejasności pytaj śmiało. :)', ephemeral: true });
+            await interaction.reply({ content: 'Ok. Nie zakładam kartoteki. W razie pytań pisz śmiało!', ephemeral: true });
+        } else if (action === 'deleteRecord') {
+            const db = loadDatabase();
+            const userRecords = db[userId];
+
+            const recordIndex = parseInt(action.split('-')[1]) - 1;
+            const recordToDelete = userRecords[recordIndex];
+
+            if (!recordToDelete) {
+                await interaction.reply({ content: 'Nie można odnaleźć wpisu do usunięcia.', ephemeral: true });
+                return;
+            }
+
+            const confirmModal = new ModalBuilder()
+                .setCustomId(`confirmDeleteRecord-${userId}`)
+                .setTitle('Potwierdź usunięcie wpisu')
+                .setDescription('Czy na pewno chcesz usunąć ten wpis?')
+                .setColor('#FF0000');
+
+            const confirmRow = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`confirmDelete-${userId}-${recordIndex}`)
+                        .setLabel('Tak')
+                        .setStyle(ButtonStyle.Danger),
+                    new ButtonBuilder()
+                        .setCustomId(`cancelDelete-${userId}`)
+                        .setLabel('Nie')
+                        .setStyle(ButtonStyle.Secondary)
+                );
+
+            await interaction.showModal(confirmModal, { components: [confirmRow] });
         }
     },
 
