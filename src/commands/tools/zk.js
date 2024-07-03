@@ -20,14 +20,6 @@ module.exports = {
     description: 'Zarządza kartoteką użytkownika.',
     async execute(message, args, client) {
         const userId = args[0];
-        const allowedRoles = [
-            '1255314190944702525',
-            '701862892315869320',
-            '1257744956420788306',
-            '1257745014067429386',
-            '1257739543738581043',
-            '1257744580682711152'
-        ];
         if (!userId) {
             return message.reply('Musisz podać ID użytkownika.');
         }
@@ -54,22 +46,21 @@ module.exports = {
             .setTitle(`Kartoteka użytkownika ${user.tag}`);
 
         userRecords.forEach((record, index) => {
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`editRecord-${userId}-${index}`)
-                        .setLabel(`Edytuj #${index + 1}`)
-                        .setStyle(ButtonStyle.Primary),
-                    new ButtonBuilder()
-                        .setCustomId(`deleteRecord-${userId}-${index}`)
-                        .setLabel(`Usuń #${index + 1}`)
-                        .setStyle(ButtonStyle.Danger)
-                )
+            const actionRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`editRecord-${userId}-${index}`)
+                    .setLabel(`Edytuj #${index + 1}`)
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId(`deleteRecord-${userId}-${index}`)
+                    .setLabel(`Usuń #${index + 1}`)
+                    .setStyle(ButtonStyle.Danger)
             );
+            modal.addComponents(actionRow);
         });
 
         await message.reply({ content: 'Otwieram kartotekę...', ephemeral: true });
-        await message.author.send({ components: [modal] });
+        await message.author.send({ content: 'Proszę wybrać akcję:', components: [modal] });
     },
 
     async handleInteraction(interaction, client) {
