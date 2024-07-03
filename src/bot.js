@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { token, prefix } = process.env;
-const { Client, Collection, GatewayIntentBits, Partials, InteractionType } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials, InteractionType, ButtonInteraction } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -24,7 +24,7 @@ for (const folder of functionFolders) {
         .filter((file) => file.endsWith('.js'));
     for (const file of functionFiles) {
         console.log(`Ładowanie funkcji z folderu: ${folder}, plik: ${file}`);
-        require(`./functions/${folder}/${file}`)(client);
+        require(`../functions/${folder}/${file}`)(client);
     }
 }
 
@@ -52,14 +52,20 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.type === InteractionType.MessageComponent) {
         const [action] = interaction.customId.split('-');
 
-        if (action.startsWith('createRecord') || action.startsWith('updateRecord') || action.startsWith('editRecord') || action.startsWith('deleteRecord')) {
+        if (action === 'createRecord' || action === 'updateRecord') {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleInteraction(interaction, client);
         } else if (action === 'noCreateRecord' || action === 'noUpdateRecord') {
             await interaction.reply({ content: 'Spoko, W razie niejasności pytaj śmiało. :)', ephemeral: true });
+        } else if (action === 'updateRecord') {
+            const kartoteka = require('./commands/tools/zk');
+            await kartoteka.handleUpdateRecord(interaction, client);
+        } else if (action.startsWith('deleteRecord')) {
+            const kartoteka = require('./commands/tools/zk');
+            await kartoteka.handleDeleteRecord(interaction, client);
         } else if (action.startsWith('confirmDelete')) {
             const kartoteka = require('./commands/tools/zk');
-            await kartoteka.handleConfirmDelete(interaction, client);
+            await kartoteka.handleInteraction(interaction, client);
         } else if (action.startsWith('cancelDelete')) {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleInteraction(interaction, client);
@@ -67,7 +73,10 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.type === InteractionType.ModalSubmit) {
         const [action] = interaction.customId.split('-');
 
-        if (action.startsWith('createRecordModal') || action.startsWith('editRecordModal')) {
+        if (action === 'createRecordModal') {
+            const kartoteka = require('./commands/tools/zk');
+            await kartoteka.handleModalSubmit(interaction, client);
+        } else if (action === 'editRecordModal') {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleModalSubmit(interaction, client);
         }
