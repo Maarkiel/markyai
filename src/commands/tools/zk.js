@@ -44,10 +44,6 @@ module.exports = {
         const components = [];
 
         userRecords.forEach((record, index) => {
-            let description = `Data: ${record.date}\nNick: ${record.nick}\nID: ${record.id}\nKategoria: ${record.category}\nOpis: ${record.description}`;
-            if (record.edited) {
-                description += ' (wpis został edytowany)';
-            }
             const actionRow = new ActionRowBuilder().addComponents(
                 new ButtonBuilder()
                     .setCustomId(`editRecord-${userId}-${index}`)
@@ -139,12 +135,10 @@ module.exports = {
             const logChannel = client.channels.cache.get('1258023123031429243');
             if (logChannel) {
                 const logEmbed = new EmbedBuilder()
-                    .setTitle(`Usunięcie wpisu kartoteki użytkownika ${interaction.user.tag} (ID: ${interaction.user.id})`)
-                    .setThumbnail(interaction.user.displayAvatarURL())
+                    .setTitle('Usunięcie wpisu kartoteki')
                     .addFields(
                         { name: 'Numer wpisu', value: `#${index + 1}`, inline: true },
                         { name: 'Użytkownik', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
-                        { name: 'Kategoria', value: deletedRecord[0].category, inline: true },
                         { name: 'Treść wpisu', value: deletedRecord[0].description }
                     )
                     .setColor('#FF0000');
@@ -176,7 +170,6 @@ module.exports = {
 
             userRecords[index].category = category;
             userRecords[index].description = description;
-            userRecords[index].edited = true; // Oznaczenie wpisu jako edytowanego
             saveDatabase(db);
 
             await interaction.reply({ content: `Wpis #${index + 1} został zaktualizowany.`, ephemeral: true });
@@ -184,12 +177,10 @@ module.exports = {
             const logChannel = client.channels.cache.get('1258023123031429243');
             if (logChannel) {
                 const logEmbed = new EmbedBuilder()
-                    .setTitle(`Edycja wpisu kartoteki użytkownika ${interaction.user.tag} (ID: ${interaction.user.id})`)
-                    .setThumbnail(interaction.user.displayAvatarURL())
+                    .setTitle('Edycja wpisu kartoteki')
                     .addFields(
                         { name: 'Numer wpisu', value: `#${index + 1}`, inline: true },
                         { name: 'Użytkownik', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
-                        { name: 'Kategoria', value: category, inline: true },
                         { name: 'Treść przed edycją', value: oldDescription },
                         { name: 'Treść po edycji', value: description }
                     )
