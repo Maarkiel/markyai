@@ -1,0 +1,83 @@
+{
+  "184021512813019136": [
+    {
+      "date": "2024-07-01T04:08:56.624Z",
+      "category": "Problematyczny",
+      "description": "Był niegrzeczny",
+      "nick": "marky_smarky",
+      "id": "184021512813019136"
+    },
+    {
+      "date": "2024-07-02T20:08:43.437Z",
+      "category": "Zbanowany",
+      "description": "masakryczny człowiek po prostu",
+      "nick": "marky_smarky",
+      "id": "184021512813019136"
+    },
+    {
+      "date": "2024-07-02T20:28:17.418Z",
+      "category": "test",
+      "description": "test",
+      "nick": "marky_smarky",
+      "id": "184021512813019136",
+      "materials": []
+    },
+    {
+      "date": "2024-07-02T20:46:55.680Z",
+      "category": "test2",
+      "description": "test2",
+      "nick": "marky_smarky",
+      "id": "184021512813019136",
+      "materials": []
+    },
+    {
+      "date": "2024-07-03T08:50:31.917Z",
+      "category": "Zbanowany",
+      "description": "test3",
+      "nick": "marky_smarky",
+      "id": "184021512813019136"
+    }
+  ],
+  "370289167583805442": [
+    {
+      "date": "2024-07-01T04:10:30.577Z",
+      "category": "Multikonto",
+      "description": "obraza użytkowniczki na vc",
+      "nick": "marky_smarky",
+      "id": "184021512813019136"
+    },
+    {
+      "date": "2024-07-01T05:15:47.500Z",
+      "category": "Multikonto",
+      "description": "podejrzenie więcej niż jednego konta",
+      "nick": "marky_smarky",
+      "id": "184021512813019136"
+    }
+  ],
+  "166175862415294464": [
+    {
+      "date": "2024-07-02T20:41:49.927Z",
+      "category": "Zbanowany",
+      "description": "Nie wiem",
+      "nick": "cattire",
+      "id": "166175862415294464",
+      "materials": []
+    },
+    {
+      "date": "2024-07-02T20:45:43.204Z",
+      "category": "test",
+      "description": "test",
+      "nick": "marky_smarky",
+      "id": "184021512813019136",
+      "materials": []
+    },
+    {
+      "date": "2024-07-02T20:45:44.470Z",
+      "category": "Problematyczny",
+      "description": "Nie chce wbijać na Voice Chat (Kłamie że idzie się umyć)",
+      "nick": "_jikan",
+      "id": "370289167583805442",
+      "materials": []
+    }
+  ]
+}
