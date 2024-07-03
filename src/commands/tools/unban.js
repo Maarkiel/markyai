@@ -4,7 +4,14 @@ module.exports = {
     name: 'unban',
     description: 'Usuwa bana z użytkownika na serwerze.',
     async execute(message, args, client) {
-        const allowedRoles = ['1255314190944702525', '701862892315869320', '1257744956420788306', '1257745014067429386', '1257739543738581043', '1257744580682711152'];
+        const allowedRoles = [
+            '1255314190944702525',
+            '701862892315869320',
+            '1257744956420788306',
+            '1257745014067429386',
+            '1257739543738581043',
+            '1257744580682711152'
+        ];
 
         const hasRole = message.member.roles.cache.some(role => allowedRoles.includes(role.id));
         if (!hasRole) {
@@ -17,12 +24,12 @@ module.exports = {
             return message.reply('Musisz podać ID użytkownika. Pamiętaj o trybie deweloperskim discorda.');
         }
         if (!reason) {
-            return message.reply('Musisz podać powód.  Pamiętaj, aby opisac go w sposób zwięzły i zrozumiały.');
+            return message.reply('Musisz podać powód. Pamiętaj, aby opisać go w sposób zwięzły i zrozumiały.');
         }
 
         const user = await client.users.fetch(userId).catch(() => null);
         if (!user) {
-            return message.reply('Nie znaleziono użytkownika o podanym ID.  Na pewno to istniejący użytkownik discorda?');
+            return message.reply('Nie znaleziono użytkownika o podanym ID. Na pewno to istniejący użytkownik discorda?');
         }
 
         try {
