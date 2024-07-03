@@ -41,9 +41,7 @@ module.exports = {
         }
 
         const userRecords = db[userId];
-        const modal = new ModalBuilder()
-            .setCustomId(`manageRecordsModal-${userId}`)
-            .setTitle(`Kartoteka użytkownika ${user.tag}`);
+        const components = [];
 
         userRecords.forEach((record, index) => {
             const actionRow = new ActionRowBuilder().addComponents(
@@ -56,11 +54,11 @@ module.exports = {
                     .setLabel(`Usuń #${index + 1}`)
                     .setStyle(ButtonStyle.Danger)
             );
-            modal.addComponents(actionRow);
+            components.push(actionRow);
         });
 
         await message.reply({ content: 'Otwieram kartotekę...', ephemeral: true });
-        await message.author.send({ content: 'Proszę wybrać akcję:', components: [modal] });
+        await message.author.send({ content: 'Proszę wybrać akcję:', components: components });
     },
 
     async handleInteraction(interaction, client) {
@@ -142,7 +140,7 @@ module.exports = {
                     .addFields(
                         { name: 'Numer wpisu', value: `#${index + 1}`, inline: true },
                         { name: 'Użytkownik', value: `${interaction.user.tag} (${interaction.user.id})`, inline: true },
-                        { name: 'Treść wpisu', value: deletedRecord.description }
+                        { name: 'Treść wpisu', value: deletedRecord[0].description }
                     )
                     .setColor('#FF0000');
 
