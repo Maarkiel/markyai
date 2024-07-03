@@ -16,163 +16,111 @@ const saveDatabase = (db) => {
 };
 
 module.exports = {
-    name: 'kartoteka',
-    description: 'Zarządza kartoteką użytkownika.',
-    async execute(message, args, client) {
-        const userId = args[0];
-        const allowedRoles = [
-            '1255314190944702525',
-            '701862892315869320',
-            '1257744956420788306',
-            '1257745014067429386',
-            '1257739543738581043',
-            '1257744580682711152'
-        ];
-        if (!userId) {
-            return message.reply('Musisz podać ID użytkownika.');
-        }
-
-        const user = await client.users.fetch(userId).catch(() => null);
-        if (!user) {
-            return message.reply('Nie znaleziono użytkownika o podanym ID.');
-        }
-
-        const db = loadDatabase();
-
-        if (!db[userId]) {
-            const embed = new EmbedBuilder()
-                .setTitle('Brak kartoteki')
-                .setDescription(`Użytkownik ${user.tag}, ID: ${userId} nie posiada kartoteki. Czy chcesz ją założyć?`)
-                .setColor('#FF0000');
-
-            const row = new ActionRowBuilder()
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId(`createRecord-${userId}`)
-                        .setLabel('Tak')
-                        .setStyle(ButtonStyle.Success),
-                    new ButtonBuilder()
-                        .setCustomId(`noCreateRecord-${userId}`)
-                        .setLabel('Nie')
-                        .setStyle(ButtonStyle.Danger)
-                );
-
-            return message.reply({ embeds: [embed], components: [row], ephemeral: true });
-        }
-
-        const userRecords = db[userId];
-        const embed = new EmbedBuilder()
-            .setTitle(`Kartoteka użytkownika ${user.tag} (${userId})`)
-            .setDescription('Użytkownik już jest wpisany w kartotece, podaje Ci wpisy:')
-            .setColor('#00FF00');
-
-        userRecords.forEach((record, index) => {
-            embed.addFields(
-                { name: `#${index + 1}`, value: `Data: ${record.date}\nNick: ${record.nick}\nID: ${record.id}\nOpis: ${record.description}`, inline: false }
-            );
-        });
-
-        const row = new ActionRowBuilder()
-            .addComponents(
-                new ButtonBuilder()
-                    .setCustomId(`updateRecord-${userId}`)
-                    .setLabel('Tak')
-                    .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                    .setCustomId(`noUpdateRecord-${userId}`)
-                    .setLabel('Nie')
-                    .setStyle(ButtonStyle.Danger)
-            );
-
-        await message.reply({ embeds: [embed], ephemeral: true });
-
-        const updateEmbed = new EmbedBuilder()
-            .setTitle('Aktualizacja kartoteki')
-            .setDescription('Czy chcesz zaktualizować kartotekę?')
-            .setColor('#FFFF00');
-
-        await message.reply({ embeds: [updateEmbed], components: [row], ephemeral: true });
-    },
-
     async handleInteraction(interaction, client) {
         const [action, userId] = interaction.customId.split('-');
 
-        if (action === 'createRecord' || action === 'updateRecord') {
+        if (action === 'updateRecord') {
             const modal = new ModalBuilder()
-                .setCustomId(`createRecordModal-${userId}`)
-                .setTitle('Załóż kartotekę');
+                .setCustomId(`updateRecordModal-${userId}`)
+                .setTitle('Aktualizacja wpisu')
+                .setDescription('Wybierz wpis do aktualizacji:');
+
+            const db = loadDatabase();
+            const userRecords = db[userId] || [];
+
+            userRecords.forEach((record, index) => {
+                modal.addComponents(
+                    new ActionRowBuilder().addComponents(
+                        new ButtonBuilder()
+                            .setCustomId(`editRecord-${userId}-${index}`)
+                            .setLabel(`#${index + 1}`)
+                            .setStyle(ButtonStyle.Primary)
+                    )
+                );
+            });
+
+            await interaction.showModal(modal);
+        } else if (action.startsWith('editRecord')) {
+            const [, userId, indexStr] = action.split('-');
+            const index = parseInt(indexStr);
+
+            const db = loadDatabase();
+            const userRecords = db[userId] || [];
+
+            if (index < 0 || index >= userRecords.length) {
+                await interaction.reply({ content: 'Nieprawidłowy wpis do edycji.', ephemeral: true });
+                return;
+            }
+
+            const record = userRecords[index];
+
+            const editModal = new ModalBuilder()
+                .setCustomId(`editRecordModal-${userId}-${index}`)
+                .setTitle(`Edycja wpisu #${index + 1}`)
+                .setDescription(`Data: ${record.date}\nNick: ${record.nick}\nID: ${record.id}\nKategoria: ${record.category}\nOpis: ${record.description}`);
 
             const categoryInput = new TextInputBuilder()
                 .setCustomId('category')
-                .setLabel('Wybierz kategorię')
+                .setLabel('Nowa kategoria')
                 .setStyle(TextInputStyle.Short)
-                .setPlaceholder('Ban,Unban,Obserwacja,Pochwała')
-                .setRequired(true);
+                .setPlaceholder(record.category)
+                .setRequired(false);
 
             const descriptionInput = new TextInputBuilder()
                 .setCustomId('description')
-                .setLabel('Opisz sytuację (co sie dzieje, jaka decyzja):')
+                .setLabel('Nowy opis')
                 .setStyle(TextInputStyle.Paragraph)
-                .setRequired(true);
+                .setPlaceholder(record.description)
+                .setRequired(false);
 
-            modal.addComponents(
+            editModal.addComponents(
                 new ActionRowBuilder().addComponents(categoryInput),
                 new ActionRowBuilder().addComponents(descriptionInput)
             );
 
-            await interaction.showModal(modal);
-        } else if (action === 'noCreateRecord' || action === 'noUpdateRecord') {
-            await interaction.reply({ content: 'Spoko, W razie niejasności pytaj śmiało. :)', ephemeral: true });
+            await interaction.showModal(editModal);
+        } else if (action.startsWith('deleteRecord')) {
+            const [, userId, indexStr] = action.split('-');
+            const index = parseInt(indexStr);
+
+            let db = loadDatabase();
+            const userRecords = db[userId] || [];
+
+            if (index < 0 || index >= userRecords.length) {
+                await interaction.reply({ content: 'Nieprawidłowy wpis do usunięcia.', ephemeral: true });
+                return;
+            }
+
+            // Usunięcie wpisu
+            userRecords.splice(index, 1);
+            saveDatabase(db);
+
+            await interaction.reply({ content: `Wpis #${index + 1} został usunięty.`, ephemeral: true });
         }
     },
 
     async handleModalSubmit(interaction, client) {
-        const [action, userId] = interaction.customId.split('-');
+        const [action, userId, indexStr] = interaction.customId.split('-');
 
-        if (action === 'createRecordModal') {
+        if (action === 'editRecordModal') {
+            const index = parseInt(indexStr);
             const db = loadDatabase();
+            const userRecords = db[userId] || [];
 
-            if (!db[userId]) {
-                db[userId] = [];
+            if (index < 0 || index >= userRecords.length) {
+                await interaction.reply({ content: 'Nieprawidłowy wpis do edycji.', ephemeral: true });
+                return;
             }
 
-            const category = interaction.fields.getTextInputValue('category');
-            const description = interaction.fields.getTextInputValue('description');
-            const nick = interaction.user.tag;
+            const category = interaction.fields.getTextInputValue('category') || userRecords[index].category;
+            const description = interaction.fields.getTextInputValue('description') || userRecords[index].description;
 
-            const newRecord = {
-                date: new Date().toISOString(),
-                category,
-                description,
-                nick,
-                id: interaction.user.id
-            };
-
-            db[userId].push(newRecord);
+            // Aktualizacja wpisu
+            userRecords[index].category = category;
+            userRecords[index].description = description;
             saveDatabase(db);
 
-            const confirmEmbed = new EmbedBuilder()
-                .setTitle('Kartoteka założona')
-                .setDescription(`Kartoteka dla użytkownika ${userId} została założona.\n\nKategoria: ${category}\nOpis: ${description}`)
-                .setColor('#00FF00');
-
-            const confirmRow = new ActionRowBuilder()
-                .addComponents(
-                    new ButtonBuilder()
-                        .setCustomId('confirmRecord')
-                        .setLabel('Ok')
-                        .setStyle(ButtonStyle.Success)
-                );
-
-            await interaction.reply({ embeds: [confirmEmbed], components: [confirmRow], ephemeral: true });
-
-            client.on('interactionCreate', async (innerInteraction) => {
-                if (!innerInteraction.isButton()) return;
-
-                if (innerInteraction.customId === 'confirmRecord') {
-                    await innerInteraction.update({ content: 'Kartoteka została zaktualizowana.', components: [] });
-                }
-            });
+            await interaction.reply({ content: `Wpis #${index + 1} został zaktualizowany.`, ephemeral: true });
         }
     }
 };
