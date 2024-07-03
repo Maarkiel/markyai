@@ -1,6 +1,6 @@
 require('dotenv').config();
 const { token, prefix } = process.env;
-const { Client, Collection, GatewayIntentBits, Partials, InteractionType, ButtonInteraction } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials, InteractionType } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
@@ -49,26 +49,38 @@ client.on('messageCreate', (message) => {
 });
 
 client.on('interactionCreate', async (interaction) => {
+    console.log('Interaction received:', interaction.customId);
+
     if (interaction.type === InteractionType.MessageComponent) {
         const [action] = interaction.customId.split('-');
+        console.log('Action:', action);
 
         if (action === 'createRecord' || action === 'updateRecord') {
-            const kartoteka = require('./src/commands/tools/zk');
+            console.log('Loading zk module...');
+            const kartoteka = require('./commands/tools/zk');
+            console.log('zk module loaded');
             await kartoteka.handleInteraction(interaction, client);
         } else if (action === 'noCreateRecord' || action === 'noUpdateRecord') {
             await interaction.reply({ content: 'Spoko, W razie niejasności pytaj śmiało. :)', ephemeral: true });
         } else if (action === 'updateRecord') {
-            const kartoteka = require('./src/commands/tools/zk');
+            console.log('Loading zk module...');
+            const kartoteka = require('./commands/tools/zk');
+            console.log('zk module loaded');
             await kartoteka.handleUpdateRecord(interaction, client);
         } else if (action.startsWith('deleteRecord')) {
-            const kartoteka = require('./src/commands/tools/zk');
+            console.log('Loading zk module...');
+            const kartoteka = require('./commands/tools/zk');
+            console.log('zk module loaded');
             await kartoteka.handleDeleteRecord(interaction, client);
         }
     } else if (interaction.type === InteractionType.ModalSubmit) {
         const [action] = interaction.customId.split('-');
+        console.log('Action:', action);
 
         if (action === 'createRecordModal') {
-            const kartoteka = require('./src/commands/tools/zk');
+            console.log('Loading zk module...');
+            const kartoteka = require('./commands/tools/zk');
+            console.log('zk module loaded');
             await kartoteka.handleModalSubmit(interaction, client);
         }
     }
