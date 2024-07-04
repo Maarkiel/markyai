@@ -52,14 +52,14 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.type === InteractionType.MessageComponent) {
         const [action] = interaction.customId.split('-');
 
-        if (action === 'createRecord' || action === 'updateRecord' || action === 'editRecord' || action === 'deleteRecord') {
+        if (action.startsWith('createRecord') || action.startsWith('updateRecord') || action.startsWith('editRecord') || action.startsWith('deleteRecord')) {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleInteraction(interaction, client);
         } else if (action === 'noCreateRecord' || action === 'noUpdateRecord') {
             await interaction.reply({ content: 'Spoko, W razie niejasności pytaj śmiało. :)', ephemeral: true });
         } else if (action.startsWith('confirmDelete')) {
             const kartoteka = require('./commands/tools/zk');
-            await kartoteka.handleInteraction(interaction, client);
+            await kartoteka.handleConfirmDelete(interaction, client);
         } else if (action.startsWith('cancelDelete')) {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleInteraction(interaction, client);
@@ -67,7 +67,7 @@ client.on('interactionCreate', async (interaction) => {
     } else if (interaction.type === InteractionType.ModalSubmit) {
         const [action] = interaction.customId.split('-');
 
-        if (action === 'createRecordModal' || action === 'editRecordModal') {
+        if (action.startsWith('createRecordModal') || action.startsWith('editRecordModal')) {
             const kartoteka = require('./commands/tools/zk');
             await kartoteka.handleModalSubmit(interaction, client);
         }
