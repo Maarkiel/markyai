@@ -18,5 +18,3 @@
 
 ## Usage
 Add the bot to your Discord server and use the provided commands to manage your community efficiently. Create card files using specific commands to store and organize user information.
-
-For more detailed instructions, visit the repository [here](https://github.com/Maarkiel/
